@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="83c0cd1e-52c7-4d3a-9317-9ca6b19c67a8" name="Changes" comment="logic file">
+      <change afterPath="$PROJECT_DIR$/llm_parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/scheduler_logic.py" beforeDir="false" afterPath="$PROJECT_DIR$/scheduler_logic.py" afterDir="false" />
     </list>
@@ -47,8 +48,10 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.llm_parser.executor": "Run",
     "Python.scheduler_logic.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "git-widget-placeholder": "master",
@@ -79,7 +82,9 @@
       <option name="presentableId" value="Default" />
       <updated>1765447282739</updated>
       <workItem from="1765447284076" duration="7236000" />
-      <workItem from="1765834867315" duration="12990000" />
+      <workItem from="1765834867315" duration="16321000" />
+      <workItem from="1766955895519" duration="6253000" />
+      <workItem from="1767559775791" duration="9952000" />
     </task>
     <task id="LOCAL‎-00001" summary="first">
       <option name="closed" value="true" />
@@ -121,7 +126,15 @@
       <option name="project" value="LOCAL‎" />
       <updated>1765749903301</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL‎-00006" summary="logic file">
+      <option name="closed" value="true" />
+      <created>1766260203021</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL‎-00006" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1766260203021</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -134,5 +147,6 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Daily_Scheduler_Bot$scheduler_logic.coverage" NAME="scheduler_logic Coverage Results" MODIFIED="1766260072172" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Daily_Scheduler_Bot$llm_parser.coverage" NAME="llm_parser Coverage Results" MODIFIED="1767692189581" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

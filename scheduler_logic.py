@@ -1,6 +1,5 @@
 from typing import Optional
 
-
 def create_empty_schedule() -> list[Optional[str]]:
     """
     Creates an empty daily schedule initialized with free slots.

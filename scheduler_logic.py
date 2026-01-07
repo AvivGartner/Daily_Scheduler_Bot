@@ -69,3 +69,16 @@ def add_unfixed_event(daily_schedule: list[Optional[str]], hours_count: int, tas
             if remaining_hours == 0:
                 return True
     return False
+
+def get_schedule(daily_schedule: list[Optional[str]]) -> str:
+    """
+    Returns the daily calendar as an ordered string in Hebrew.
+    :param daily_schedule: The daily schedule list.
+    :return: Ordered string.
+    """
+    output = "\nהלוח היומי שלך:"
+    for hour, task_name in enumerate(daily_schedule):
+        time_label = f"{hour}:00"
+        content = task_name if task_name is not None else "שעה פנויה"
+        output += f"\n{time_label} - {content}\n"
+    return output

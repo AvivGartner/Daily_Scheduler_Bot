@@ -11,7 +11,7 @@ def create_empty_schedule() -> list[Optional[str]]:
     daily_schedule = [None] * 24
     return daily_schedule
 
-def add_fixed_event(daily_schedule: list[Optional[str]], start_hour: int, end_hour: int, task_name: str) -> bool:
+def add_fixed_event(daily_schedule: list[Optional[str]], start_hour: int, end_hour: int, task_name: str) -> tuple[bool, str]:
     """
     Assigns a task to a specific range of in the schedule, if available.
     This is used to add non-negotiable fixed constraints (e.g., classes, sleep).
@@ -19,40 +19,40 @@ def add_fixed_event(daily_schedule: list[Optional[str]], start_hour: int, end_ho
     :param start_hour: Event start time. (0-23).
     :param end_hour: Event end time. (0-23).
     :param task_name: The name of the task to schedule.
-    :return: True if the schedule was successfully scheduled, False otherwise.
+    :return: True if the schedule was successfully scheduled, False otherwise, and str about error if the schedule was not successfully scheduled.
     """
     if start_hour > end_hour: # Checking whether the start time is before the end time
-        print("Start hour must be smaller than end hour.")
-        return False
+        print(f"Start hour of {task_name} must be smaller than end hour.")
+        return False, f"שעת התחלת המשימה {task_name} לא יכולה להיות לאחר שעת הסיום. נסה שנית."
     if start_hour < 0 or start_hour > 23: # Check whether the start hour is correct.
-        print("Start hour must be between 0 and 23.")
-        return False
+        print(f"Start hour of {task_name} must be between 0 and 23.")
+        return False, f"שעת התחלת המשימה {task_name} חייבת להיות בין 0 ל23. נסה שנית."
     if end_hour < 1 or end_hour > 24: # Check whether the end hour is correct.
-        print("End hour must be between 1 and 24.")
-        return False
+        print(f"End hour of {task_name} must be between 1 and 24.")
+        return False, f"שעת סיום המשימה {task_name} חייבת להיות בין 1 ל24. נסה שנית."
     for hour in range(start_hour, end_hour):
         if daily_schedule[hour] is not None: # Check whether the input hours is already full.
-            print("You have already scheduled that hour.")
-            return False
+            print(f"You have already scheduled that hour of {task_name} at {hour}.")
+            return False, f"השעות שבחרת עבור המשימה {task_name} כבר תפוסות. נסה שנית."
     for hour in range(start_hour, end_hour):
         daily_schedule[hour] = task_name # Insert the task at the hours time.
-    print("The schedule has been successfully scheduled.")
-    return True
+    print(f"The schedule {task_name} has been successfully scheduled.")
+    return True, ""
 
-def add_unfixed_event(daily_schedule: list[Optional[str]], hours_count: int, task_name: str) -> bool:
+def add_unfixed_event(daily_schedule: list[Optional[str]], hours_count: int, task_name: str) -> tuple[bool, str]:
     """
     Adds a task with a number of hours but no specific hours to the schedule, if available.
     :param daily_schedule: The daily schedule list to modify (24 slots).
     :param hours_count: The number of hours required for the task
     :param task_name: The name of the task to schedule.
-    :return: True if the schedule was successfully scheduled, False otherwise.
+    :return: True if the schedule was successfully scheduled, False otherwise' and str about error if the schedule was not successfully scheduled.
     """
     if hours_count < 1 or hours_count > 24: # Checking whether the number of hours of the task is possible for a day.
-        print("Invalid hour count.")
-        return False
+        print(f"Invalid hour count of {task_name}.")
+        return False, f"כמות השעות שהכנסת עבור המשימה {task_name} אינה אפשרית. נסה שנית."
     if daily_schedule.count(None) < hours_count: # Checking whether there are enough free hours in the day.
-        print("You have not enough free hours to schedule.")
-        return False
+        print(f"You have not enough free hours to schedule {task_name}.")
+        return False, f"אין מספיק שעות פנויות בלוח עבור המשימה {task_name}. נסה שנית."
     sum_continuous_hour = 0  # Used to check the number of consecutive hours available, in order to find a suitable sequence for the task and enter it.
     for i, hour in enumerate(daily_schedule): # This loop is used to check whether there are enough consecutive hours available, and if so, inserts the task in the sequence.
         if hour is None:
@@ -67,8 +67,8 @@ def add_unfixed_event(daily_schedule: list[Optional[str]], hours_count: int, tas
             daily_schedule[i] = task_name
             remaining_hours -= 1
             if remaining_hours == 0:
-                return True
-    return False
+                return True, ""
+    return False, ""
 
 def get_schedule(daily_schedule: list[Optional[str]]) -> str:
     """

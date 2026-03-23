@@ -9,7 +9,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Define the connectivity to the AI model: API key, model type, and link to it.
 apiKey = "AIzaSyBQW5HdrmChvmS2BN2OyqW9Vlrg5TaaQiY"
-MODEL_NAME = "gemini-2.5-flash-preview-09-2025"
+MODEL_NAME = "gemini-2.5-flash"
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL_NAME}:generateContent?key={apiKey}"
 
 # Define the desired json file structure.

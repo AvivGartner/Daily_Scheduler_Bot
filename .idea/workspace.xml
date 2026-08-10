@@ -5,9 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="83c0cd1e-52c7-4d3a-9317-9ca6b19c67a8" name="Changes" comment="console main">
-      <change afterPath="$PROJECT_DIR$/main_telegram.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main_console.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_console.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/llm_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/llm_parser.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scheduler_logic.py" beforeDir="false" afterPath="$PROJECT_DIR$/scheduler_logic.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,6 +48,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.gemini-code-1785966043708.executor": "Run",
     "Python.llm_parser.executor": "Run",
     "Python.main.executor": "Run",
     "Python.main_console.executor": "Run",

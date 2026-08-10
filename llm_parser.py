@@ -2,14 +2,21 @@ import requests
 import json
 import time
 import urllib3
+import os
+from dotenv import load_dotenv
 from typing import Optional, Dict, List
+import sys
+sys.set_int_max_str_digits(10000)
+
+# Read the information from the .env file.
+load_dotenv()
 
 # Designed to overcome antivirus software (and in this case, NetSpark).
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Define the connectivity to the AI model: API key, model type, and link to it.
-apiKey = "AIzaSyBQW5HdrmChvmS2BN2OyqW9Vlrg5TaaQiY"
-MODEL_NAME = "gemini-2.5-flash"
+apiKey = os.getenv("GEMINI_API_KEY")
+MODEL_NAME = "gemini-3.5-flash-lite"
 API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{MODEL_NAME}:generateContent?key={apiKey}"
 
 # Define the desired json file structure.
@@ -24,26 +31,26 @@ ACTION_SCHEMA = {
                     "action_type": {
                         "type": "STRING",
                         "enum": ["add_fixed", "add_unfixed", "view_schedule", "clear_all"],
-                        "description": "The type of action to perform based on user intent."
+                        "description": "The type of action to perform."
                     },
                     "task_name": {
                         "type": "STRING",
-                        "description": "The name of the task (e.g, 'Meeting', 'study')."
+                        "description": "Task name. Use 'none' if action is view_schedule or clear_all."
                     },
                     "start_hour": {
                         "type": "INTEGER",
-                        "description": "Start hour (0-23). Required only for 'add_fixed'."
+                        "description": "Start hour (0-23). If not provided, MUST be -1."
                     },
                     "end_hour": {
                         "type": "INTEGER",
-                        "description": "End hour (1-24). Required only for 'add_fixed'."
+                        "description": "End hour (0-24). If not provided, MUST be -1."
                     },
                     "hours_count": {
                         "type": "INTEGER",
-                        "description": "Duration in hours. Required only for 'add_unfixed'."
+                        "description": "Duration. If not provided, MUST be -1."
                     }
                 },
-                "required": ["action_type", "task_name"]
+                "required": ["action_type", "task_name", "start_hour", "end_hour", "hours_count"]
             }
         }
     },
@@ -52,15 +59,13 @@ ACTION_SCHEMA = {
 
 # Instructions to AI regarding user input and how to analyze it.
 SYSTEM_PROMPT = """
-You are a professional schedule assistant. Your task is to extract scheduling actions from the user's text.
-The user speaks Hebrew. You must analyze their request and return a list of actions in JSON format.
-
-Guidelines:
-- If a user specifies a time range (e.g., 10:00 to 12:00), use 'add_fixed'.
-- If a user specifies a duration (e.g., 3 hours) without a specific time, use 'add_unfixed'.
-- If the user wants to see their day, use 'view_schedule'.
-- If the user wants to start over, use 'clear_all'.
-- Be precise with hours (e.g., '10 PM' is 22).
+You are a professional schedule assistant. The user speaks Hebrew.
+Extract actions into JSON. 
+CRITICAL RULES for time fields:
+- If the user gives a start and end time (e.g., 8 to 17), use 'add_fixed' and set start_hour=8, end_hour=17.
+- If the user gives only a duration (e.g., 2 hours), use 'add_unfixed' and set hours_count=2.
+- For ANY field that is not provided by the user or not relevant to the action (like end_hour in 'add_unfixed'), you MUST output -1. Do not omit the key.
+- 'task_name' should be 'none' if the action is clear_all or view_schedule.
 """
 
 def parse_user_request(user_text: str) -> Optional[Dict]:
@@ -79,6 +84,7 @@ def parse_user_request(user_text: str) -> Optional[Dict]:
         "generationConfig": {
             "responseMimeType": "application/json",
             "responseSchema": ACTION_SCHEMA,
+            "temperature": 0.0
         }
     }
     # Retry mechanism (Exponential Backoff)
@@ -88,15 +94,21 @@ def parse_user_request(user_text: str) -> Optional[Dict]:
                 API_URL,
                 headers={"Content-Type": "application/json"},
                 data=json.dumps(payload),
-                timeout = 10,
+                timeout = 30,
                 verify=False
             )
             # Check for success (HTTP 200)
             if response.status_code == 200:
+
                 result = response.json()
                 # Extract text from nested response
                 # Structure: result -> candidates -> content -> parts -> text
                 json_content = result['candidates'][0]['content']['parts'][0]['text']
+
+                print("\n--- RAW MODEL OUTPUT START ---")
+                print(json_content)
+                print("--- RAW MODEL OUTPUT END ---\n")
+
                 # Convert JSON string to Python dictionary
                 return json.loads(json_content)
             # Handle temporary server errors (like overload)

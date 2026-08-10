@@ -21,6 +21,8 @@ def add_fixed_event(daily_schedule: list[Optional[str]], start_hour: int, end_ho
     :param task_name: The name of the task to schedule.
     :return: True if the schedule was successfully scheduled, False otherwise, and str about error if the schedule was not successfully scheduled.
     """
+    if start_hour == -1 or end_hour == -1:
+        return False, f"הבוט לא הצליח להבין את שעות האירוע במדויק. אנא נסה שוב עם שעת התחלה וסיום ברורות."
     if start_hour > end_hour: # Checking whether the start time is before the end time
         print(f"Start hour of {task_name} must be smaller than end hour.")
         return False, f"שעת התחלת המשימה {task_name} לא יכולה להיות לאחר שעת הסיום. נסה שנית."

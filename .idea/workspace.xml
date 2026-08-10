@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="83c0cd1e-52c7-4d3a-9317-9ca6b19c67a8" name="Changes" comment="console main">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/llm_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/llm_parser.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scheduler_logic.py" beforeDir="false" afterPath="$PROJECT_DIR$/scheduler_logic.py" afterDir="false" />
-    </list>
+    <list default="true" id="83c0cd1e-52c7-4d3a-9317-9ca6b19c67a8" name="Changes" comment="new key" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -201,7 +197,23 @@
       <option name="project" value="LOCAL‎" />
       <updated>1774268599913</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL‎-00011" summary="new key">
+      <option name="closed" value="true" />
+      <created>1786396640384</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL‎-00011" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1786396640384</updated>
+    </task>
+    <task id="LOCAL‎-00012" summary="new key">
+      <option name="closed" value="true" />
+      <created>1786396685776</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL‎-00012" />
+      <option name="project" value="LOCAL‎" />
+      <updated>1786396685776</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -212,7 +224,8 @@
     <MESSAGE value="logic file" />
     <MESSAGE value="logic file, add return massages" />
     <MESSAGE value="console main" />
-    <option name="LAST_COMMIT_MESSAGE" value="console main" />
+    <MESSAGE value="new key" />
+    <option name="LAST_COMMIT_MESSAGE" value="new key" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Daily_Scheduler_Bot$scheduler_logic.coverage" NAME="scheduler_logic Coverage Results" MODIFIED="1766260072172" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

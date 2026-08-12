@@ -1,9 +1,13 @@
+import os
+from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes, CommandHandler
 from llm_parser import parse_user_request
 from scheduler_logic import create_empty_schedule, add_fixed_event, add_unfixed_event, get_schedule
 
-TOKEN = "8651412118:AAFdWKkEyqQxwnOfWd9q3lhdedmpeamRk6M" # Token for the bot in Telegram.
+load_dotenv()
+
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN") # Token for the bot in Telegram.
 schedule = create_empty_schedule()
 
 async def handle_telegram_message(update: Update, context: ContextTypes.DEFAULT_TYPE):

@@ -23,9 +23,9 @@ def add_fixed_event(daily_schedule: list[Optional[str]], start_hour: int, end_ho
     """
     if start_hour == -1 or end_hour == -1:
         return False, f"הבוט לא הצליח להבין את שעות האירוע במדויק. אנא נסה שוב עם שעת התחלה וסיום ברורות."
-    if start_hour > end_hour: # Checking whether the start time is before the end time
+    if start_hour >= end_hour: # Checking whether the duration is positive (Fixed zero-duration bug)
         print(f"Start hour of {task_name} must be smaller than end hour.")
-        return False, f"שעת התחלת המשימה {task_name} לא יכולה להיות לאחר שעת הסיום. נסה שנית."
+        return False, f"שעת התחלת המשימה {task_name} חייבת להיות לפני שעת הסיום. נסה שנית."
     if start_hour < 0 or start_hour > 23: # Check whether the start hour is correct.
         print(f"Start hour of {task_name} must be between 0 and 23.")
         return False, f"שעת התחלת המשימה {task_name} חייבת להיות בין 0 ל23. נסה שנית."
@@ -39,7 +39,7 @@ def add_fixed_event(daily_schedule: list[Optional[str]], start_hour: int, end_ho
     for hour in range(start_hour, end_hour):
         daily_schedule[hour] = task_name # Insert the task at the hours time.
     print(f"The schedule {task_name} has been successfully scheduled.")
-    return True, ""
+    return True, f"המשימה '{task_name}' נוספה בהצלחה בין השעות {start_hour}:00 ל-{end_hour}:00! 📅"
 
 def add_unfixed_event(daily_schedule: list[Optional[str]], hours_count: int, task_name: str) -> tuple[bool, str]:
     """
@@ -69,18 +69,34 @@ def add_unfixed_event(daily_schedule: list[Optional[str]], hours_count: int, tas
             daily_schedule[i] = task_name
             remaining_hours -= 1
             if remaining_hours == 0:
-                return True, ""
-    return False, ""
+                return True, f"המשימה '{task_name}' נוספה בהצלחה ללוח עבור {hours_count} שעות פנויות! 📅"
+    return False, "לא נמצא מספיק מקום פנוי בלוח."
 
 def get_schedule(daily_schedule: list[Optional[str]]) -> str:
     """
-    Returns the daily calendar as an ordered string in Hebrew.
-    :param daily_schedule: The daily schedule list.
-    :return: Ordered string.
+    Returns the daily calendar as an ordered string in Hebrew,
+    grouping consecutive identical slots together for a clean and readable layout.
     """
-    output = "\nהלוח היומי שלך:"
-    for hour, task_name in enumerate(daily_schedule):
-        time_label = f"{hour}:00"
-        content = task_name if task_name is not None else "שעה פנויה"
-        output += f"\n{time_label} - {content}\n"
+    output = "📅 *הלוח היומי שלך:*"
+    if not daily_schedule:
+        return output + "\nהלוח ריק."
+
+    groups = []
+    current_task = daily_schedule[0]
+    start_hour = 0
+
+    for hour in range(1, 24):
+        task = daily_schedule[hour]
+        if task != current_task:
+            groups.append((start_hour, hour, current_task))
+            start_hour = hour
+            current_task = task
+    # Append the last active block
+    groups.append((start_hour, 24, current_task))
+
+    for start, end, task_name in groups:
+        time_range = f"⏰ {start:02d}:00 - {end:02d}:00"
+        content = f"*{task_name}*" if task_name is not None else "_שעה פנויה_"
+        output += f"\n{time_range} : {content}"
+        
     return output

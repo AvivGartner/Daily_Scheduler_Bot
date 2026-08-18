@@ -1,6 +1,6 @@
 import requests
 import json
-import time
+import asyncio
 import urllib3
 import os
 from dotenv import load_dotenv
@@ -68,7 +68,7 @@ CRITICAL RULES for time fields:
 - 'task_name' should be 'none' if the action is clear_all or view_schedule.
 """
 
-def parse_user_request(user_text: str) -> Optional[Dict]:
+async def parse_user_request(user_text: str) -> Optional[Dict]:
     """
     Send free text to Gemini and returning a corresponding json file.
     This function handles the API communication, including constructing the payload with the defined schema and system prompts.
@@ -90,31 +90,35 @@ def parse_user_request(user_text: str) -> Optional[Dict]:
     # Retry mechanism (Exponential Backoff)
     for delay in [1, 2, 4, 8]:
         try:
-            response = requests.post(
+            response = await asyncio.to_thread(
+                requests.post,
                 API_URL,
                 headers={"Content-Type": "application/json"},
                 data=json.dumps(payload),
-                timeout = 30,
+                timeout=30,
                 verify=False
             )
             # Check for success (HTTP 200)
             if response.status_code == 200:
-
                 result = response.json()
-                # Extract text from nested response
-                # Structure: result -> candidates -> content -> parts -> text
-                json_content = result['candidates'][0]['content']['parts'][0]['text']
+                try:
+                    # Extract text safely
+                    json_content = result['candidates'][0]['content']['parts'][0]['text']
 
-                print("\n--- RAW MODEL OUTPUT START ---")
-                print(json_content)
-                print("--- RAW MODEL OUTPUT END ---\n")
+                    print("\n--- RAW MODEL OUTPUT START ---")
+                    print(json_content)
+                    print("--- RAW MODEL OUTPUT END ---\n")
 
-                # Convert JSON string to Python dictionary
-                return json.loads(json_content)
+                    # Convert JSON string to Python dictionary
+                    return json.loads(json_content)
+                except (KeyError, IndexError, json.JSONDecodeError) as parse_error:
+                    print(f"Error parsing Gemini JSON response: {parse_error}")
+                    print(f"Raw response structure: {result}")
+                    return None
             # Handle temporary server errors (like overload)
             if response.status_code in [429, 500, 503]:
                 print(f"Server busy (Status Code: {response.status_code}), retrying in {delay} seconds...")
-                time.sleep(delay)
+                await asyncio.sleep(delay)
                 continue
             else:
                 # Critical error (e.g., wrong key) - no point retrying
@@ -123,5 +127,5 @@ def parse_user_request(user_text: str) -> Optional[Dict]:
                 break
         except Exception as e:
             print(f"Network or parsing error: {e}")
-            time.sleep(delay)
+            await asyncio.sleep(delay)
     return None

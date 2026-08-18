@@ -8,7 +8,9 @@ from scheduler_logic import create_empty_schedule, add_fixed_event, add_unfixed_
 load_dotenv()
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN") # Token for the bot in Telegram.
-schedule = create_empty_schedule()
+
+# Dictionary mapping Telegram User ID (int) -> user-specific schedule list (list)
+user_schedules = {}
 
 async def handle_telegram_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -20,28 +22,37 @@ async def handle_telegram_message(update: Update, context: ContextTypes.DEFAULT_
     :param context: A Telegram "context" object, providing additional background tools from the library.
     :return: None. The function sends the responses (msg) directly to the user in Telegram.
     """
-    global schedule
+    # Defensive guard to ensure message and text exist (prevents AttributeErrors)
+    if not update.message or not update.message.text:
+        return
+
+    # Identify the user and retrieve/initialize their specific schedule
+    user_id = update.effective_user.id
+    if user_id not in user_schedules:
+        user_schedules[user_id] = create_empty_schedule()
+    user_schedule = user_schedules[user_id]
+
     user_text = update.message.text
     await update.message.reply_text("חושב על זה...\n")
-    ai_response = parse_user_request(user_text) # Text processing by AI (Gemini).
+    ai_response = await parse_user_request(user_text) # Text processing by AI (Gemini) asynchronously.
     if ai_response is None: # Return an error message if there was an internet failure.
         await update.message.reply_text("שגיאת תקשורת, נסה שנית\n")
         return
     actions_list = ai_response.get("actions", [])
     for action in actions_list: # A loop runs through all the commands in a variable, executing each of them by calling the relevant function.
         if action.get("action_type") == "add_fixed":
-            is_success, msg = add_fixed_event(schedule, action.get("start_hour"), action.get("end_hour"), action.get("task_name"))
+            is_success, msg = add_fixed_event(user_schedule, action.get("start_hour"), action.get("end_hour"), action.get("task_name"))
             if msg != "":
                 await update.message.reply_text(msg)
         elif action.get("action_type") == "add_unfixed":
-            is_success, msg = add_unfixed_event(schedule, action.get("hours_count"), action.get("task_name"))
+            is_success, msg = add_unfixed_event(user_schedule, action.get("hours_count"), action.get("task_name"))
             if msg != "":
                 await update.message.reply_text(msg)
         elif action.get("action_type") == "view_schedule":
-            msg = get_schedule(schedule)
+            msg = get_schedule(user_schedule)
             await update.message.reply_text(msg)
         elif action.get("action_type") == "clear_all":
-            schedule = create_empty_schedule()
+            user_schedules[user_id] = create_empty_schedule()
             await update.message.reply_text("הלוח נמחק בהצלחה")
         else:
             continue

@@ -39,7 +39,12 @@ async def handle_telegram_message(update: Update, context: ContextTypes.DEFAULT_
         await update.message.reply_text("שגיאת תקשורת, נסה שנית\n")
         return
     actions_list = ai_response.get("actions", [])
-    for action in actions_list: # A loop runs through all the commands in a variable, executing each of them by calling the relevant function.
+    
+    # Prioritize action execution order: clear_all -> add_fixed -> add_unfixed -> view_schedule
+    action_priority = {"clear_all": 0, "add_fixed": 1, "add_unfixed": 2, "view_schedule": 3}
+    sorted_actions = sorted(actions_list, key=lambda a: action_priority.get(a.get("action_type"), 4))
+
+    for action in sorted_actions: # A loop runs through all the commands in a variable, executing each of them by calling the relevant function.
         if action.get("action_type") == "add_fixed":
             is_success, msg = add_fixed_event(user_schedule, action.get("start_hour"), action.get("end_hour"), action.get("task_name"))
             if msg != "":

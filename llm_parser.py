@@ -56,16 +56,22 @@ ACTION_SCHEMA = {
     },
     "required": ["actions"]
 }
-
 # Instructions to AI regarding user input and how to analyze it.
 SYSTEM_PROMPT = """
 You are a professional schedule assistant. The user speaks Hebrew.
 Extract actions into JSON. 
-CRITICAL RULES for time fields:
-- If the user gives a start and end time (e.g., 8 to 17), use 'add_fixed' and set start_hour=8, end_hour=17.
-- If the user gives only a duration (e.g., 2 hours), use 'add_unfixed' and set hours_count=2.
-- For ANY field that is not provided by the user or not relevant to the action (like end_hour in 'add_unfixed'), you MUST output -1. Do not omit the key.
-- 'task_name' should be 'none' if the action is clear_all or view_schedule.
+
+CRITICAL RULES:
+1. Task Name Normalization & Context:
+   - Keep the FULL context and description of the user's task. DO NOT delete words.
+   - ALWAYS convert the main action verb (usually the first word) to its Hebrew infinitive form (צורת מקור).
+   - Examples: "לומד אלגוריתמים" -> "ללמוד אלגוריתמים", "עובד על קורות חיים" -> "לעבוד על קורות חיים", "אוכל" -> "לאכול".
+   - 'task_name' should be 'none' if the action is clear_all or view_schedule.
+
+2. Time Fields:
+   - If the user gives a start and end time (e.g., 8 to 17), use 'add_fixed' and set start_hour=8, end_hour=17.
+   - If the user gives only a duration (e.g., 2 hours), use 'add_unfixed' and set hours_count=2.
+   - For ANY field that is not provided by the user or not relevant to the action (like end_hour in 'add_unfixed'), you MUST output -1. Do not omit the key.
 """
 
 async def parse_user_request(user_text: str) -> Optional[Dict]:

@@ -69,7 +69,10 @@ def add_unfixed_event(daily_schedule: list[Optional[str]], hours_count: int, tas
             daily_schedule[i] = task_name
             remaining_hours -= 1
             if remaining_hours == 0:
-                return True, f"המשימה '{task_name}' נוספה בהצלחה ללוח עבור {hours_count} שעות פנויות! 📅"
+                break
+                
+    if remaining_hours == 0:
+        return True, f"המשימה '{task_name}' נוספה בהצלחה ללוח עבור {hours_count} שעות פנויות! 📅"
     return False, "לא נמצא מספיק מקום פנוי בלוח."
 
 def get_schedule(daily_schedule: list[Optional[str]]) -> str:

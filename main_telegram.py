@@ -1,7 +1,11 @@
 import os
+import db
+from typing import Optional
 from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes, CommandHandler
+
+from db import get_slots
 from llm_parser import parse_user_request
 from scheduler_logic import create_empty_schedule, add_fixed_event, add_unfixed_event, get_schedule
 
@@ -9,8 +13,20 @@ load_dotenv()
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN") # Token for the bot in Telegram.
 
-# Dictionary mapping Telegram User ID (int) -> user-specific schedule list (list)
-user_schedules = {}
+
+
+def build_schedule_from_db(user_id: int) -> list[Optional[str]]:
+    """
+       Reconstructs a user's daily schedule from the schedule stored in the database.
+       :param user_id: Telegram user ID.
+       :return: A 24-slot schedule list reconstructed from the database.
+       """
+    schedule = create_empty_schedule() # Creates an empty 24-slot schedule.
+    slots = db.get_slots(user_id) # Retrieves the user's schedule slots from the database.
+    for start_hour, end_hour, task_name in slots:
+        for hour in range(start_hour, end_hour):
+            schedule[hour] = task_name # Fills each hour in the slot with the task name.
+    return schedule
 
 async def handle_telegram_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -26,11 +42,10 @@ async def handle_telegram_message(update: Update, context: ContextTypes.DEFAULT_
     if not update.message or not update.message.text:
         return
 
-    # Identify the user and retrieve/initialize their specific schedule
+    # Identify the user and reconstruct their schedule from the database
     user_id = update.effective_user.id
-    if user_id not in user_schedules:
-        user_schedules[user_id] = create_empty_schedule()
-    user_schedule = user_schedules[user_id]
+    user_schedule = build_schedule_from_db(user_id)
+
 
     user_text = update.message.text
     await update.message.reply_text("חושב על זה...\n")
@@ -46,21 +61,51 @@ async def handle_telegram_message(update: Update, context: ContextTypes.DEFAULT_
 
     for action in sorted_actions: # A loop runs through all the commands in a variable, executing each of them by calling the relevant function.
         if action.get("action_type") == "add_fixed":
-            is_success, msg = add_fixed_event(user_schedule, action.get("start_hour"), action.get("end_hour"), action.get("task_name"))
+            start_hour = action.get("start_hour")
+            end_hour   = action.get("end_hour")
+            task_name  = action.get("task_name")
+            is_success, msg = add_fixed_event(user_schedule, start_hour, end_hour, task_name)
             if msg != "":
                 await update.message.reply_text(msg)
+            if is_success:
+                db.add_slot(user_id, start_hour, end_hour, task_name) # Persist the new slot to the database.
         elif action.get("action_type") == "add_unfixed":
-            is_success, msg = add_unfixed_event(user_schedule, action.get("hours_count"), action.get("task_name"))
+            task_name     = action.get("task_name")
+            hours_count   = action.get("hours_count")
+            schedule_before = user_schedule[:] # Save a copy of the schedule before the call to detect newly assigned hours.
+            is_success, msg = add_unfixed_event(user_schedule, hours_count, task_name)
             if msg != "":
                 await update.message.reply_text(msg)
+            if is_success:
+                # Find which hours were newly assigned to task_name by comparing before and after.
+                # A slot is "new" only if it was None before the call and is task_name after;
+                # this avoids mistaking pre-existing same-named slots for newly scheduled ones.
+                new_hours = [
+                    i for i in range(24)
+                    if schedule_before[i] is None and user_schedule[i] == task_name
+                ]
+                # Convert the list of individual hours into contiguous [start_hour, end_hour) spans.
+                if new_hours:
+                    span_start = new_hours[0]
+                    prev_hour  = new_hours[0]
+                    for h in new_hours[1:]:
+                        if h == prev_hour + 1:
+                            prev_hour = h # Extend the current span.
+                        else:
+                            db.add_slot(user_id, span_start, prev_hour + 1, task_name) # Gap found: persist completed span.
+                            span_start = h
+                            prev_hour  = h
+                    db.add_slot(user_id, span_start, prev_hour + 1, task_name) # Persist the final span.
         elif action.get("action_type") == "view_schedule":
             msg = get_schedule(user_schedule)
             await update.message.reply_text(msg)
         elif action.get("action_type") == "clear_all":
-            user_schedules[user_id] = create_empty_schedule()
+            db.clear_slots(user_id) # Erase all of this user's slots from the database.
+            user_schedule = create_empty_schedule() # Also reset the local list so subsequent actions in the same message start from a clean state.
             await update.message.reply_text("הלוח נמחק בהצלחה")
         else:
             continue
+
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """

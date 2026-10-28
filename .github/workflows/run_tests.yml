@@ -1,0 +1,32 @@
+# This workflow runs the pytest test suite automatically on every push to main.
+# It installs all project dependencies and runs all tests in verbose mode.
+
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository so the runner can access the project files.
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Step 2: Install Python 3.14 to match the project's virtual environment.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      # Step 3: Install all dependencies listed in requirements.txt, including pytest.
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Step 4: Run the full test suite. A test failure will mark the workflow as failed.
+      - name: Run tests
+        run: python -m pytest -v
